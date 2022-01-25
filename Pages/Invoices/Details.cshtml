@@ -1,0 +1,81 @@
+﻿@page
+@model IdentityApp.Pages.Invoices.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Invoice</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Invoice.InvoiceAmount)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Invoice.InvoiceAmount)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Invoice.InvoiceMonth)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Invoice.InvoiceMonth)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Invoice.InvoiceOwner)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Invoice.InvoiceOwner)
+        </dd>
+        @*Add display for invoice status*@
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Invoice.Status)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Invoice.Status)
+        </dd>
+    </dl>
+</div>
+@*Check that the invoice is not yet approved to show approve button*@
+@if (Model.Invoice.Status != InvoiceStatus.Approved)
+{
+    @* make sure the user has rights to approve an invoice to show the approve button*@
+    @if ((await AuthorizationService.AuthorizeAsync(
+     User, Model.Invoice, InvoiceOperations.Approve)).Succeeded)
+    {
+        <form style="display:inline;" method="post">
+            <input type="hidden" name="id" value="@Model.Invoice.InvoiceId" />
+            <input type="hidden" name="status" value="@InvoiceStatus.Approved" />
+            <button type="submit" class="btn btn-xs btn-success">Approve</button>
+        </form>
+    }
+}
+
+@*Check that the invoice is not yet rejected to show reject button*@
+@if (Model.Invoice.Status != InvoiceStatus.Rejected)
+{
+    @* make sure the user has rights to reject an invoice to show the reject button*@
+    @if ((await AuthorizationService.AuthorizeAsync(
+     User, Model.Invoice, InvoiceOperations.Reject)).Succeeded)
+    {
+        <form style="display:inline;" method="post">
+            <input type="hidden" name="id" value="@Model.Invoice.InvoiceId" />
+            <input type="hidden" name="status" value="@InvoiceStatus.Rejected" />
+            <button type="submit" class="btn btn-xs btn-danger">Reject</button>
+        </form>
+    }
+}
+
+<div>
+    @*Check that the user has right to edit an invoice before showing the edit invoice link*@
+    @if ((await AuthorizationService.AuthorizeAsync(
+         User, Model.Invoice,
+         InvoiceOperations.Update)).Succeeded)
+    {
+        <a asp-page="./Edit" asp-route-id="@Model.Invoice.InvoiceId">Edit</a>
+        <text> | </text>
+    }
+    <a asp-page="./Index">Back to List</a>
+</div>

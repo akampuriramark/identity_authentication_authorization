@@ -3,3 +3,7 @@
 @using IdentityApp.Data
 @namespace IdentityApp.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using IdentityApp.Authorization;
+@using IdentityApp.Models
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService

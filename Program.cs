@@ -1,4 +1,6 @@
+using IdentityApp.Authorization;
 using IdentityApp.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,8 +13,26 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+// Register Authorization handlers.
+builder.Services.AddScoped<IAuthorizationHandler,
+                      InvoiceOwnerAuthorizationHandler>();
+
+builder.Services.AddSingleton<IAuthorizationHandler,
+                      InvoiceAdminAuthorizationHandler>();
+
+builder.Services.AddSingleton<IAuthorizationHandler,
+                      InvoiceManagerAuthorizationHandler>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -40,6 +60,18 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 var app = builder.Build();
+// we create a scope to run the database seeding process
+using (var scope = app.Services.CreateScope())
+{
+    // we then extract the registered services from the scope
+    var services = scope.ServiceProvider;
+    // our database context is apart of these registered services
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    // we run migrations if any or create the database is it does not exist already.
+    context.Database.Migrate();
+    // initialize the database with roles, accounts and sample invoices
+    await SeedData.Initialize(services);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
