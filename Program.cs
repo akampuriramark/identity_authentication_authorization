@@ -69,8 +69,13 @@ using (var scope = app.Services.CreateScope())
     var context = services.GetRequiredService<ApplicationDbContext>();
     // we run migrations if any or create the database is it does not exist already.
     context.Database.Migrate();
+
+    // read our secrets configuration for the seed account password.
+    var seedUserPass = builder.Configuration.GetValue<string>("SeedUserPass");
+
     // initialize the database with roles, accounts and sample invoices
-    await SeedData.Initialize(services);
+    // accounts will be seeded with the password we set in our secrets json configuration.
+    await SeedData.Initialize(services, seedUserPass);
 }
 
 // Configure the HTTP request pipeline.
