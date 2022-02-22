@@ -53,11 +53,6 @@ namespace IdentityApp.Pages.Invoices
 
         public async Task<IActionResult> OnPostAsync(int id)
         {
-            // first we validaste the invoice model to make usre it is valid
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
 
             // Fetch invoice from DB to get its creator.
             var invoice = await Context

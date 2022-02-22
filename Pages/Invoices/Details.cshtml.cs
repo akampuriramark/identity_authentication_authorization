@@ -72,7 +72,7 @@ namespace IdentityApp.Pages.Invoices
                                                        ? InvoiceOperations.Approve
                                                        : InvoiceOperations.Reject;
 
-            // verify that the usere has right to approve or reject an invoice
+            // verify that the user has rights to approve or reject an invoice
             var isAuthorized = await AuthorizationService.AuthorizeAsync(User, Invoice,
                                         invoiceOperation);
 

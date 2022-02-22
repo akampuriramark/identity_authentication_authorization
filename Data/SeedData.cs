@@ -28,8 +28,6 @@ namespace IdentityApp.Data
                 // and then attach the manager user to the manager role.
                 await EnsureRole(serviceProvider, managerID, Constants.InvoiceManagersRole);
 
-                // now that we have users created, let's add some sample invoices in the database.
-                SeedDB(context, adminID);
             }
         }
 
@@ -100,50 +98,6 @@ namespace IdentityApp.Data
             IR = await userManager.AddToRoleAsync(user, role);
 
             return IR;
-        }
-
-        public static void SeedDB(ApplicationDbContext context, string adminID)
-        {
-            // if the invoice table contains any data, the database ahs been seeded
-            // no need to seed again
-            if (context.Invoice.Any())
-            {
-                return;
-            }
-
-            // let's creat afew invoices so that we can be able to test our application.
-            context.Invoice.AddRange(
-                // we are going to create an approved invoice for Denis for the month of January
-                new Invoice
-                {
-                    InvoiceMonth = "Jan",
-                    InvoiceOwner = "Denis",
-                    InvoiceAmount = 1300,
-                    Status = InvoiceStatus.Approved,
-                    CreatorId = adminID
-                },
-                // let's add another invoice for another employee, Mark for the same month
-                // for some reason, his was rejected.
-                new Invoice
-                {
-                    InvoiceMonth = "Jan",
-                    InvoiceOwner = "Mark",
-                    InvoiceAmount = 1900,
-                    Status = InvoiceStatus.Rejected,
-                    CreatorId = adminID
-                },
-                // let's add one last invoice of status submitted from another employee, Mo
-                new Invoice
-                {
-                    InvoiceMonth = "Jan",
-                    InvoiceOwner = "Mo",
-                    InvoiceAmount = 800,
-                    Status = InvoiceStatus.Submitted,
-                    CreatorId = adminID
-                }
-             );
-            // we then persist our invoices into the databse
-            context.SaveChanges();
         }
     }
 }
